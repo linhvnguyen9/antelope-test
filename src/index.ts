@@ -1,6 +1,8 @@
 import { Api, JsonRpc } from 'eosjs';
-import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';  // DEVELOPMENT ONLY, THIS IS INSECURE!!! https://developers.eos.io/manuals/eosjs/latest/faq/what-is-a-signature-provider
+import { JsSignatureProvider, PrivateKey, PublicKey } from 'eosjs/dist/eosjs-jssig';  // DEVELOPMENT ONLY, THIS IS INSECURE!!! https://developers.eos.io/manuals/eosjs/latest/faq/what-is-a-signature-provider
 import dotenv from 'dotenv';
+import { generate, decrypt } from '@greymass/keycert'
+const ecc = require('eosjs-ecc');
 
 dotenv.config();
 
@@ -11,10 +13,27 @@ const privateKeys = [process.env.PRIVATE_KEY as string];
 const accountName = process.env.ACCOUNT_NAME as string;
 
 const signatureProvider = new JsSignatureProvider(privateKeys);
-const rpc = new JsonRpc('https://jungle4.cryptolions.io:443'); //required to read blockchain state
+const jungleUrl = 'https://jungle4.cryptolions.io:443';
+const mainnetUrl = 'https://eos.greymass.com/';
+const rpc = new JsonRpc(jungleUrl); //required to read blockchain state
 const api = new Api({ rpc, signatureProvider }); //required to submit transactions
 
 (async () => {
+  // const delegatebwActions = [{
+  //   account: 'eosio',
+  //   name: 'delegatebw',
+  //   authorization: [{
+  //     actor: accountName,
+  //     permission: 'owner',
+  //   }],
+  //   data: {
+  //     from: accountName,
+  //     receiver: accountName,
+  //     stake_net_quantity: '1.0000 EOS',
+  //     stake_cpu_quantity: '1.0000 EOS',
+  //     transfer: false,
+  //   }
+  // }]
   const buyRamActions = [{
     account: 'eosio',
     name: 'buyrambytes',
@@ -29,9 +48,9 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
     },
   }];
 
-  const newAccountName = 'erdoxlwldoro';
-  const newAccountOwnerKey = 'EOS6EVrDX2TDGybJNXuHyzz6SpRwmSsL4yC75u5gYnkozeDJav4ok'
-  const newAccountActiveKey = 'EOS7tvPWbq3Q6vRjeaYhHs3iLatmyn2ZZU6GcKNkj77LzJJUBgDqB'
+  const newAccountName = 'wquwb24l5bms';
+  const newAccountActiveKey = 'EOS68yq6S171iqQWxwXBe4HmE63TLY5C6ubp6sZTHD4PmN6cMQuh5'
+  const newAccountOwnerKey = 'EOS5qzfPpijq9LNvWytqxjb5CXNsmwdzrZqqm2LUcYsdkZDzuFBtm'
 
   const createAccountActions = [
     {
@@ -64,34 +83,34 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
         },
       }
     },
+    //   {
+    //     account: 'eosio',
+    //     name: 'ramtransfer',
+    //     authorization: [{
+    //       actor: accountName,
+    //       permission: 'active',
+    //     }],
+    //     data: {
+    //       bytes: 4096,
+    //       from: accountName,
+    //       memo: "",
+    //       to: newAccountName
+    //     },
+    //   },
+    // }
     {
       account: 'eosio',
-      name: 'ramtransfer',
+      name: 'buyrambytes',
       authorization: [{
         actor: accountName,
         permission: 'active',
       }],
       data: {
-        bytes: 4096,
-        from: accountName,
-        memo: "",
-        to: newAccountName
+        payer: accountName,
+        receiver: newAccountName,
+        bytes: 2965,
       },
     },
-    // }
-    // {
-    //   account: 'eosio',
-    //   name: 'buyrambytes',
-    //   authorization: [{
-    //     actor: accountName,
-    //     permission: 'active',
-    //   }],
-    //   data: {
-    //     payer: accountName,
-    //     receiver: newAccountName,
-    //     bytes: 2965,
-    //   },
-    // },
     // {
     //   account: 'eosio',
     //   name: 'delegatebw',
@@ -109,31 +128,124 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
     // }
   ]
 
-  const ramReceiver = 'ekrieidovkdk';
-  const ramTransferActions = [{
-    account: 'eosio',
-    name: 'ramtransfer',
+  // const ramReceiver = 'ekrieidovkdk';
+  // const ramTransferActions = [{
+  //   account: 'eosio',
+  //   name: 'ramtransfer',
+  //   authorization: [{
+  //     actor: accountName,
+  //     permission: 'active',
+  //   }],
+  //   data: {
+  //     bytes: 4096,
+  //     from: accountName,
+  //     memo: "",
+  //     to: ramReceiver
+  //   },
+  // }]
+
+  const sendTokenActions = [{
+    account: 'eosio.token',
+    name: 'transfer',
     authorization: [{
       actor: accountName,
       permission: 'active',
     }],
     data: {
-      bytes: 4096,
       from: accountName,
-      memo: "",
-      to: ramReceiver
-    },
+      to: 'mangalaprovn',
+      quantity: '0.5000 JUNGLE',
+      memo: 'some memo'
+    }
   }]
 
-  // const transaction = await api.transact({
-  //   actions: createAccountActions
-  // }, {
-  //   blocksBehind: 3,
-  //   expireSeconds: 30,
+  const transaction = await api.transact({
+    actions: sendTokenActions
+  }, {
+    blocksBehind: 3,
+    expireSeconds: 30,
+  });
+  console.log(transaction);
+  // const accountDetails = await rpc.get_account('hamsterchain')
+  // console.log(accountDetails);
+  // console.log(accountDetails.permissions[0].required_auth);
+  // console.log(accountDetails.permissions[1].required_auth);
+
+  // const randomKey = await ecc.unsafeRandomKey()
+  // console.log(randomKey);
+
+  // // const input = randomKey.toString()
+  // const input = 'PVT_K1_6XHWTx1hGCifFRfJxS9aGDtqctnPc8sG6T2EwhRrgVyLnHwha'
+  // const inputPublic = 'PUB_K1_6BcojHgkD4Ayitvci5Upgx9LT48KWqxGmmPaWkoyRMT2ZNx2cs'
+
+  // const publicKey = PublicKey.fromString(inputPublic)
+  // const publicKeyLegacy = publicKey.toLegacyString()
+  // console.log(publicKeyLegacy);
+
+
+  // const privateKey = PrivateKey.fromString(input)
+  // const privateKeyK1Format = privateKey.toString()
+  // const publicKey = privateKey.getPublicKey();
+  // console.log(`Public Key: ${publicKey.toString()}`);
+  // console.log(`Legacy Public Key: ${publicKey.toLegacyString()}`);
+  // console.log(`Standard Private Key: ${randomKey}`);
+  // console.log(`PVT_K1_ Private Key: ${privateKeyK1Format}`);
+
+  // const privateKey = 'PVT_R1_27ngUUNx1U9ct6waqbE3yAfvv1THmouAh3NjU2iAzA4BeYxK3G'
+  // const privKey = PrivateKey.fromString(privateKey)
+  // const privKeyLegacy = privKey.toLegacyString()
+  // const publicKey = privKey.getPublicKey().toLegacyString()
+  // console.log(publicKey);
+  // console.log(privKeyLegacy);
+
+  // const privateKeys = [
+  //   'PVT_R1_27ngUUNx1U9ct6waqbE3yAfvv1THmouAh3NjU2iAzA4BeYxK3G',
+  //   'PVT_R1_XfrbXUYupNxBNZR1Sfquea1kJEYE1Zb6CBqkEd4eBBgy2r9zV',
+  //   'PVT_R1_28vuqoJByptvX3MemauTi8xhkQydz1bfER9v6vBfvLB4Y9CCmz',
+  //   'PVT_R1_2tjqJ5mQ8YjT8ZVTJrKSFSbdAHTeEumxsdfnyn1nGKPqrUT7Y1',
+  //   'PVT_R1_bt1FUeqnEMTq9UJKXn6AdCBPkXKjrWx8ZfxS18g89Drsahod3',
+  //   'PVT_R1_2pqadvm79FR2PfLgjeBEXipmspZg3ECv4YvBE7rwxheY937MSs',
+  //   'PVT_R1_TVJVMF5SoXBUsKxwh8Jtv3wZyYsmYAwAN9RS7MxPLajG1dncb'
+  // ];
+
+  // privateKeys.forEach(privateKey => {
+  //   const privKey = PrivateKey.fromString(privateKey);
+  //   const privKeyLegacy = privKey.toLegacyString();
+  //   const publicKey = privKey.getPublicKey();
+  //   const publicKeyLegacy = publicKey.toLegacyString();
+
+  //   console.log(`Private Key: ${privateKey}`);
+  //   console.log(`Legacy Private Key: ${privKeyLegacy}`);
+  //   console.log(`Public Key: ${publicKey.toString()}`);
+  //   console.log(`Legacy Public Key: ${publicKeyLegacy}`);
+  //   console.log('---');
   // });
-  // console.log(transaction);
-  const accountDetails = await rpc.get_account('erdoxlwldoro')
-  console.log(accountDetails);
-  console.log(accountDetails.permissions[0].required_auth.keys[0].key);
-  console.log(accountDetails.permissions[1].required_auth.keys[0].key);
+
+  // const publicKey = 'PUB_K1_7L2JAxku6J4Xsgjs1pV4ihMp6wNsxfpZJUArqstNbzZHFwpZna'
+  // const pubKey = PublicKey.fromString(publicKey)
+  // const pubKeyLegacy = pubKey.toLegacyString()
+  // console.log(pubKeyLegacy);
+
+  // const getAbi = await rpc.get_abi('eosio')
+  // console.log(getAbi.abi?.actions);
+  // console.log(getAbi.abi?.tables.map(table => table.name));
+
+  // const result = await rpc.get_table_rows({
+  //   json: true,               // Get the response as json
+  //   code: 'eosio',      // Contract that we target
+  //   scope: 'eosio',         // Account that owns the data
+  //   table: 'rammarket',        // Table name
+  //   limit: 10,                // Maximum number of rows that we want to get
+  //   reverse: false,           // Optional: Get reversed data
+  //   show_payer: false          // Optional: Show ram payer
+  // });
+  // console.log(result.rows[0].base);
+  // console.log(result.rows[0].quote);
+
+  // const decryptResult = await decrypt(
+  //   'anchorcert:KgKgBT5ajPc6VroP2hHk2S4COKSiqnT8z0bVqRB0aEAAAAAAXHMoXQAAAACAqyanACTh3X6hzLZx-dGsO0swCpi2WDg_Xd8mSK-C2kY_gygHpHe8jNk',
+  //   ['number', 'arrow', 'twenty', 'permit', 'much', 'caution']
+  // )
+  // console.log(decryptResult);
+
 })();
