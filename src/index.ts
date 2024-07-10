@@ -2,6 +2,8 @@ import { Api, JsonRpc } from 'eosjs';
 import { JsSignatureProvider, PrivateKey, PublicKey } from 'eosjs/dist/eosjs-jssig';  // DEVELOPMENT ONLY, THIS IS INSECURE!!! https://developers.eos.io/manuals/eosjs/latest/faq/what-is-a-signature-provider
 import dotenv from 'dotenv';
 import { generate, decrypt } from '@greymass/keycert'
+import { hexToUint8Array } from 'eosjs/dist/eosjs-serialize';
+import { TransactionBuilder } from 'eosjs/dist/eosjs-api';
 const ecc = require('eosjs-ecc');
 
 dotenv.config();
@@ -34,7 +36,7 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
   //     transfer: false,
   //   }
   // }]
-  const buyRamActions = [{
+  const buyRamAction = {
     account: 'eosio',
     name: 'buyrambytes',
     authorization: [{
@@ -46,7 +48,8 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
       receiver: accountName,
       bytes: 8192,
     },
-  }];
+  }
+  const buyRamActions = [buyRamAction];
 
   const newAccountName = 'wquwb24l5bms';
   const newAccountActiveKey = 'EOS68yq6S171iqQWxwXBe4HmE63TLY5C6ubp6sZTHD4PmN6cMQuh5'
@@ -144,7 +147,7 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
   //   },
   // }]
 
-  const sendTokenActions = [{
+  const sendTokenAction = {
     account: 'eosio.token',
     name: 'transfer',
     authorization: [{
@@ -154,18 +157,83 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
     data: {
       from: accountName,
       to: 'mangalaprovn',
-      quantity: '0.5000 JUNGLE',
+      quantity: '0.5000 EOS',
       memo: 'some memo'
+    }
+  }
+
+  const sendTokenActions = [sendTokenAction]
+
+  const powerUpActions = [{
+    account: 'eosio',
+    name: 'powerup',
+    authorization: [{
+      actor: accountName,
+      permission: 'active',
+    }],
+    data: {
+      payer: accountName,
+      receiver: accountName,
+      days: 1,
+      net_frac: 20000000000,
+      cpu_frac: 80000000000,
+      max_payment: '10.0000 EOS',
     }
   }]
 
+  const rexActions = [{
+    account: 'eosio',
+    name: 'deposit',
+    authorization: [{
+      actor: accountName,
+      permission: 'active',
+    }],
+    data: {
+      owner: accountName,
+      amount: '10.0000 EOS',
+    }
+  }, {
+    account: 'eosio',
+    name: 'rentcpu', // Can either be rentcpu or rentrex
+    authorization: [{
+      actor: accountName,
+      permission: 'active',
+    }],
+    data: {
+      from: accountName,
+      receiver: accountName,
+      loan_payment: '10.0000 EOS',
+      loan_fund: '0.0000 EOS',
+    },
+  }]
+
+  // const serializedTransaction = api.serializeTransaction({
+  //   actions: rexActions,
+  //   expiration: '2024-07-05T15:19:28.000',
+  //   ref_block_num: 58891,
+  //   ref_block_prefix: 1148260653,
+  // })
+  // console.log(serializedTransaction);
+  
+
+  // const deserializedTransaction = api.deserializeTransaction(hexToUint8Array('000f88660be62d117144000000000100a6823403ea3055000000572d3ccdcd0110999c6a4e0aaf6900000000a8ed32322110999c6a4e0aaf693037bdd544c3a6911027000000000000044a554e474c45000000'));
+  // console.log(deserializedTransaction);
+  // console.log(deserializedTransaction.actions[0].authorization);
+  // console.log(hexToUint8Array(deserializedTransaction.actions[0].data))
+
+  // const serializedTransaction = api.serializeTransaction(deserializedTransaction);
+  // console.log(serializedTransaction);
+  
+  const actionsList = [buyRamAction, sendTokenAction]
+
   const transaction = await api.transact({
-    actions: sendTokenActions
+    actions: actionsList
   }, {
     blocksBehind: 3,
     expireSeconds: 30,
   });
   console.log(transaction);
+
   // const accountDetails = await rpc.get_account('hamsterchain')
   // console.log(accountDetails);
   // console.log(accountDetails.permissions[0].required_auth);
