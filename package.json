@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "npx ts-node ./src/index.ts"
+    "start": "npx ts-node ./src/index.ts",
+    "fuel": "npx ts-node ./src/greymass-fuel.ts"
   },
   "keywords": [],
   "author": "",

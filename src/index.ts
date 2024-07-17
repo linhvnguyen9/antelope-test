@@ -216,23 +216,37 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
   // console.log(serializedTransaction);
   
 
-  // const deserializedTransaction = api.deserializeTransaction(hexToUint8Array('000f88660be62d117144000000000100a6823403ea3055000000572d3ccdcd0110999c6a4e0aaf6900000000a8ed32322110999c6a4e0aaf693037bdd544c3a6911027000000000000044a554e474c45000000'));
-  // console.log(deserializedTransaction);
+  const test = hexToUint8Array('1cd397664335b18ccbe500000000010000735802ea305500000040615ae9ad0110c255335f53113200000000a8ed32323110c255335f531132000000204873bd3e0210c255335f53113200000000a8ed323220c255335f53113200000000a8ed323200')
+  console.log(test);
+  const deserializedTransaction = api.deserializeTransaction(test);
+  console.log(deserializedTransaction);
   // console.log(deserializedTransaction.actions[0].authorization);
   // console.log(hexToUint8Array(deserializedTransaction.actions[0].data))
 
   // const serializedTransaction = api.serializeTransaction(deserializedTransaction);
   // console.log(serializedTransaction);
-  
-  const actionsList = [buyRamAction, sendTokenAction]
 
-  const transaction = await api.transact({
-    actions: actionsList
-  }, {
-    blocksBehind: 3,
-    expireSeconds: 30,
-  });
-  console.log(transaction);
+  const cosign_noop = {
+    account: 'greymassnoop',
+    name: 'noop',
+    authorization: [
+      {
+        actor: 'greymassfuel',
+        permission: 'cosign',
+      }
+    ],
+    data: {}
+  }
+  
+  const actionsList = [cosign_noop, sendTokenAction]
+
+  // const transaction = await api.transact({
+  //   actions: actionsList
+  // }, {
+  //   blocksBehind: 3,
+  //   expireSeconds: 30,
+  // });
+  // console.log(transaction);
 
   // const accountDetails = await rpc.get_account('hamsterchain')
   // console.log(accountDetails);
