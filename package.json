@@ -16,11 +16,13 @@
     "@greymass/keycert": "^1.5.0",
     "@wharfkit/resources": "^1.2.3",
     "dotenv": "^16.4.5",
+    "eosio-signing-request": "^2.5.3",
     "eosjs": "^22.1.0",
     "eosjs-ecc": "^4.0.7",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
+    "@types/node": "^22.5.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   }

@@ -1,10 +1,12 @@
 import { Api, JsonRpc } from 'eosjs';
 import { JsSignatureProvider, PrivateKey, PublicKey } from 'eosjs/dist/eosjs-jssig';  // DEVELOPMENT ONLY, THIS IS INSECURE!!! https://developers.eos.io/manuals/eosjs/latest/faq/what-is-a-signature-provider
 import dotenv from 'dotenv';
-import { generate, decrypt } from '@greymass/keycert'
-import { hexToUint8Array } from 'eosjs/dist/eosjs-serialize';
-import { TransactionBuilder } from 'eosjs/dist/eosjs-api';
-const ecc = require('eosjs-ecc');
+import { generate, KeyCertificate } from '@greymass/keycert';
+import { log } from 'console';
+// import { generate, decrypt } from '@greymass/keycert'
+// import { hexToUint8Array } from 'eosjs/dist/eosjs-serialize';
+// import { TransactionBuilder } from 'eosjs/dist/eosjs-api';
+// const ecc = require('eosjs-ecc');
 
 dotenv.config();
 
@@ -21,6 +23,26 @@ const rpc = new JsonRpc(jungleUrl); //required to read blockchain state
 const api = new Api({ rpc, signatureProvider }); //required to submit transactions
 
 (async () => {
+  // generate({
+  //     privateKey: '5K4uP2kHwbnfDPt2nM7hu8VJJXjEZhWEefmYkexhoqA4aRVUue5',
+  //     account: {actor: 'qibgvn3v3iox', permission: 'active'},
+  //     chainId: '73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d',
+  // }).then(({cert, encryptionWords}) => {
+  //     console.log(String(cert)) // anchorcert:KgKgBT5ajPc6VroP2hHk2S4COKSiqnT8z0bVqRB0aEAAAAAAXHMoXQAAAACAqyanACTh3X6hzLZx-dGsO0swCpi2WDg_Xd8mSK-C2kY_gygHpHe8jNk
+  //     console.log(encryptionWords) // [ 'number', 'arrow', 'twenty', 'permit', 'much', 'caution' ]
+  // })
+
+  const keyCert = KeyCertificate.fromString('anchorcert:c-Q4WicI5tcEiDT7wQefL6uxezwSWxRq9DiXHpBxbE3QqRt7zM2OswAAAACo7TIyACR7vU4h6d0--tjQ_tluIYLtDpdZJSqNb-wpoQ19HN_UbSUgCc0')
+  console.log(keyCert.encryptedPrivateKeyMnemonic)
+  const decryped = await keyCert.decrypt([ 'sadness', 'improve', 'blast', 'erupt', 'blue', 'magnet' ])
+  console.log(decryped)
+
+  return
+
+  const publicKeyString = 'PUB_K1_6kpZtC5ANyZDksfTJKtEQ6demKTDx1KdQyY99Yhwe27f9feXg1'
+  const publicKey = PublicKey.fromString(publicKeyString)
+  console.log(publicKey.toLegacyString());
+
   // const delegatebwActions = [{
   //   account: 'eosio',
   //   name: 'delegatebw',
@@ -46,14 +68,14 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
     data: {
       payer: accountName,
       receiver: accountName,
-      bytes: 8192,
+      bytes: 1,
     },
   }
   const buyRamActions = [buyRamAction];
 
-  const newAccountName = 'wquwb24l5bms';
-  const newAccountActiveKey = 'EOS68yq6S171iqQWxwXBe4HmE63TLY5C6ubp6sZTHD4PmN6cMQuh5'
-  const newAccountOwnerKey = 'EOS5qzfPpijq9LNvWytqxjb5CXNsmwdzrZqqm2LUcYsdkZDzuFBtm'
+  const newAccountName = 'ieldicoapsir';
+  const newAccountActiveKey = 'EOS6r5yY3h9KXAFazs615hedKMiQAPgLb663Uhqz4PkbVRisLpfuC'
+  const newAccountOwnerKey = 'EOS6r5yY3h9KXAFazs615hedKMiQAPgLb663Uhqz4PkbVRisLpfuC'
 
   const createAccountActions = [
     {
@@ -61,7 +83,7 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
       name: 'newaccount',
       authorization: [{
         actor: accountName,
-        permission: 'active',
+        permission: 'createaccound',
       }],
       data: {
         creator: accountName,
@@ -86,34 +108,34 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
         },
       }
     },
-    //   {
-    //     account: 'eosio',
-    //     name: 'ramtransfer',
-    //     authorization: [{
-    //       actor: accountName,
-    //       permission: 'active',
-    //     }],
-    //     data: {
-    //       bytes: 4096,
-    //       from: accountName,
-    //       memo: "",
-    //       to: newAccountName
-    //     },
-    //   },
-    // }
     {
       account: 'eosio',
-      name: 'buyrambytes',
+      name: 'ramtransfer',
       authorization: [{
         actor: accountName,
-        permission: 'active',
+        permission: 'createaccound',
       }],
       data: {
-        payer: accountName,
-        receiver: newAccountName,
-        bytes: 2965,
+        bytes: 4096,
+        from: accountName,
+        memo: "",
+        to: newAccountName
       },
     },
+    // }
+    // {
+    //   account: 'eosio',
+    //   name: 'buyrambytes',
+    //   authorization: [{
+    //     actor: accountName,
+    //     permission: 'active',
+    //   }],
+    //   data: {
+    //     payer: accountName,
+    //     receiver: newAccountName,
+    //     bytes: 2965,
+    //   },
+    // },
     // {
     //   account: 'eosio',
     //   name: 'delegatebw',
@@ -190,7 +212,7 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
     }],
     data: {
       owner: accountName,
-      amount: '10.0000 EOS',
+      amount: '1.0000 EOS',
     }
   }, {
     account: 'eosio',
@@ -202,7 +224,7 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
     data: {
       from: accountName,
       receiver: accountName,
-      loan_payment: '10.0000 EOS',
+      loan_payment: '1.0000 EOS',
       loan_fund: '0.0000 EOS',
     },
   }]
@@ -216,10 +238,10 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
   // console.log(serializedTransaction);
   
 
-  const test = hexToUint8Array('1cd397664335b18ccbe500000000010000735802ea305500000040615ae9ad0110c255335f53113200000000a8ed32323110c255335f531132000000204873bd3e0210c255335f53113200000000a8ed323220c255335f53113200000000a8ed323200')
-  console.log(test);
-  const deserializedTransaction = api.deserializeTransaction(test);
-  console.log(deserializedTransaction);
+  // const test = hexToUint8Array('9955a266f57da62695cd000000000250299d181be9d565000000000050299d0110955e181be9d565000000004ce63045000000006ea904a4b9000000572d3ccdcd0100240357cdab8f9700000000a8ed32322100240357cdab8f9700593298193c25df0100000000000000004252414d0000000000')
+  // console.log(test);
+  // const deserializedTransaction = api.deserializeTransaction(test);
+  // console.log(deserializedTransaction);
   // console.log(deserializedTransaction.actions[0].authorization);
   // console.log(hexToUint8Array(deserializedTransaction.actions[0].data))
 
@@ -238,10 +260,10 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
     data: {}
   }
   
-  const actionsList = [cosign_noop, sendTokenAction]
+  // const actionsList = [rexActions]
 
   // const transaction = await api.transact({
-  //   actions: actionsList
+  //   actions: [buyRamAction]
   // }, {
   //   blocksBehind: 3,
   //   expireSeconds: 30,
@@ -329,5 +351,83 @@ const api = new Api({ rpc, signatureProvider }); //required to submit transactio
   //   ['number', 'arrow', 'twenty', 'permit', 'much', 'caution']
   // )
   // console.log(decryptResult);
+
+  // const data = fs.readFileSync('/Users/linh/Documents/Wallet/antelope-test/src/chucker-export-1722262311903.json', 'utf8');
+  // const jsonData: any = JSON.parse(data);
+
+  // const string = JSON.stringify(jsonData.data.map((data: any) => data.low))
+  // console.log(string);
+
+  // const action = await api.serializeActions(rexActions)
+  // console.log(action);
+  
+  // const actions = [
+  //   {
+  //     account: 'eosio.token',
+  //     name: 'transfer',
+  //     authorization: [
+  //       {
+  //         actor: 'harkonnenmgl',
+  //         permission: 'active',
+  //       }
+  //     ], data: {
+  //       from: accountName,
+  //       to: "mangalaprovn",
+  //       quantity: "0.1000 EOS",
+  //       memo: "",
+  //     },
+  //   }
+  // ];
+
+  // const serialized_actions = await api.serializeActions(actions)
+  // console.log(serialized_actions);
+  
+  // // BUILD THE MULTISIG PROPOSE TRANSACTION
+  // const proposeInput = {
+  //   proposer: accountName,
+  //   proposal_name: 'changeowner1',
+  //   requested: [
+  //     {
+  //       actor: accountName,
+  //       permission: 'active'
+  //     }
+  //   ],
+  //   trx: {
+  //     expiration: '2024-09-16T16:39:15',
+  //     ref_block_num: 0,
+  //     ref_block_prefix: 0,
+  //     max_net_usage_words: 0,
+  //     max_cpu_usage_ms: 0,
+  //     delay_sec: 0,
+  //     context_free_actions: [],
+  //     actions: serialized_actions,
+  //     transaction_extensions: []
+  //   }
+  // };
+
+  // const proposeAction = [{
+  //   account: 'eosio.msig',
+  //   name: 'propose',
+  //   authorization: [{
+  //     actor: accountName,
+  //     permission: 'active',
+  //   }],
+  //   data: proposeInput,
+  // }]
+  // const serializedProposeAction = await api.serializeActions(proposeAction)
+  // console.log(serializedProposeAction);
+
+  //PROPOSE THE TRANSACTION
+  const result = await api.transact({
+    actions: createAccountActions
+  }, {
+    blocksBehind: 3,
+    expireSeconds: 600,
+    broadcast: true,
+    sign: true
+  });
+  console.log(result)
+  console.log((result as any).signatures);
+  // console.log(arrayToHex((result as any).serializedTransaction as Uint8Array));
 
 })();
